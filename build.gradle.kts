@@ -57,7 +57,7 @@ allprojects {
 dependencies {
     // Compile against the oldest supported Bukkit API. Anything newer is
     // reached through dev.vanish.bukkit.compat.Compat, never a hard link.
-    compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT")
     compileOnly("net.kyori:adventure-api:4.26.1")
     compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
 
@@ -75,7 +75,7 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
     implementation("net.kyori:adventure-text-serializer-legacy:4.26.1")
 
-    testImplementation("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
+    testImplementation("org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
