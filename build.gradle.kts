@@ -62,7 +62,7 @@ dependencies {
     compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
 
     // Optional integration; compile-only so the plugin loads without PlaceholderAPI.
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("me.clip:placeholderapi:2.12.3")
 
     implementation(project(":common"))
 
