@@ -23,9 +23,9 @@ dependencies {
     bundled(project(":common"))
     bundled("com.github.retrooper:packetevents-api:2.14.0")
     bundled("com.github.retrooper:packetevents-netty-common:2.14.0")
-    bundled("net.kyori:adventure-api:4.26.1")
-    bundled("net.kyori:adventure-text-serializer-gson:4.26.1")
-    bundled("net.kyori:adventure-text-serializer-plain:4.26.1")
+    bundled("net.kyori:adventure-api:5.2.0")
+    bundled("net.kyori:adventure-text-serializer-gson:5.2.0")
+    bundled("net.kyori:adventure-text-serializer-plain:5.2.0")
 }
 
 configurations.named("bundled") {
