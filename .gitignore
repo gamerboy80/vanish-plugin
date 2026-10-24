@@ -27,8 +27,8 @@
 .\#*
 
 # Gradle
-/.gradle/
-/build/
+.gradle/
+build/
 out/
 
 ## Binary
@@ -92,3 +92,6 @@ venv/
 
 # Generated CLAUDE.md (source of truth is AGENTS.md)
 /CLAUDE.md
+
+# Local build toolchain/cache used by agents (not part of the repository)
+/.tools/

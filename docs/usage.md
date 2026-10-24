@@ -1,53 +1,24 @@
-# Extending the Example Code
+# Usage
 
-### Adding new top-level commands
-To add an entirely new command (e.g. `/fly`), follow the `ExampleCommand` pattern:
+See the repository [README](../README.md) for installation, commands, permissions and
+configuration, and [compatibility.md](compatibility.md) for the 1.8.8-26.x behavior matrix.
 
-1. Create a class extending `BaseCommand` (from [cw-commons](https://github.com/CrimsonWarpedcraft/cw-commons)); build the full `CommandAPICommand` tree in the constructor and pass it to `super(...)`
-2. Call `.register()` on an instance of it in `ExamplePlugin.onEnable()`, alongside the existing `new ExampleCommand(config, creeperKillsManager, this).register()`
-3. Add its permissions to `plugin.yml`. Do not add the command itself. CommandAPI registers it programmatically
-4. Write unit tests for each executor class following the `PingTest`/`GreetTest` pattern
+Quick start (Spigot/Paper):
 
-### Adding subcommands
-To add a subcommand to `/example`, follow the `Ping`/`Greet` pattern:
+1. Install `Vanish-<version>.jar`. PacketEvents is bundled; do not add it separately.
+2. Give staff `vanish.use` (and optionally `vanish.auto`) plus `vanish.see`.
+3. Run `/vanish`. Use `/vanish options` to inspect or change saved switches and
+   `/vanish interactions on|off` to flip the whole interaction guard group.
+4. State is saved atomically to `plugins/Vanish/vanish.yml` before visibility changes.
+5. Edit `palette` and `messages` in `config.yml`, then run `/vanish reload` to retheme every
+   message. Messages accept `{primary}`, `{accent}`, `{muted}` and the other palette tokens plus
+   `{player}`, `{state}`, `{count}` and `{players}`.
 
-1. Create a class implementing CommandAPI's `CommandExecutor`; inject any config values via the constructor
-2. Add a `.withSubcommand(...)` call in `ExampleCommand`'s constructor
-3. Write a unit test following `PingTest` or `GreetTest` — mock `CommandSender` and `CommandArguments`, call `run()`, verify `sendRichMessage()`
-4. If the subcommand needs a config value, add it to `PluginConfig` and `config.yml`
+Quick start (Fabric/Forge/NeoForge):
 
-### Adding new config fields
-This project provides an example of loading config files using Jackson with Hibernate Validator,
-via cw-commons' `Config` interface and `BukkitConfigManagerBuilder`
-(`com.crimsonwarpedcraft.cwcommons.config.bukkit`).
-
-To define your own config, add fields annotated with a Bean Validation constraint and a `@JsonProperty` YAML key to `PluginConfig` (`config/PluginConfig.java`):
-
-```java
-@NotBlank
-@JsonProperty("my-message")
-private String myMessage = "default";
-```
-
-Then add a getter. The config is validated upfront on every startup. If any constraint fails, the plugin logs the offending fields and disables itself cleanly.
-
-Add a matching entry to `src/main/resources/config.yml` for every field you add, with a comment if desired:
-
-```yaml
-# Description of what the setting controls.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-my-message: "default"
-```
-
-Comments are preserved because `saveDefaultConfig()` writes this file once on first startup and never overwrites it. Schema migrations rewrite the file, but those are rare, and require custom code to handle.
-
-### Adding persistent per-player data
-cw-commons' `BukkitDataStoreBuilder`/`Repository`/`PlayerDataManager` stores any JSON-shaped data per player, not just counters. To add a new field, follow the `PlayerData`/`CreeperKillListener` pattern:
-
-1. Add a field with a getter/setter to `PlayerData` (`data/PlayerData.java`)
-2. Reuse the existing `Repository<UUID, PlayerData>`/`PlayerDataManager<PlayerData>` pair built once from the `BukkitDataStoreBuilder` store in `ExamplePlugin.onEnable()` — one repository backs every field on `PlayerData`, so adding a field never requires a new repository
-3. Read and write it with `PlayerDataManager#get`/`#save`, e.g. from a `Listener` like `CreeperKillListener` or a command executor like `CreepersKilled`
-4. Write unit tests mocking `PlayerDataManager`, following `CreeperKillListenerTest`/`CreepersKilledTest`
-5. (Optional) Periodically flush data stores using `AutoFlushTask.builder(...).build().start()` to prevent session data loss from an unexpected shutdown.
-
-Note: `PlayerDataManager` is just a `Player`-keyed convenience wrapper. For data that isn't tied to a specific player, call `DataStore#repository` directly with a different `KeySerializer` (e.g. `KeySerializers.forString()`) to get a standalone `Repository` for that data.
+1. Install `Vanish-Fabric`, `Vanish-Forge` or `Vanish-NeoForge` in `mods/`.
+2. Operate the server (command level 2). Operators may vanish and see vanished players.
+3. Run `/vanish` or `/v`, then `/vanish list` to inspect hidden staff.
+4. `config/vanish/config.json` is created on first start; `/vanish reload` re-reads it. The same
+   `palette` tokens and message templates control modded messages. State is written atomically to
+   `config/vanish/vanish.json` before visibility changes.
