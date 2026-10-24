@@ -58,8 +58,8 @@ dependencies {
     // Compile against the oldest supported Bukkit API. Anything newer is
     // reached through dev.vanish.bukkit.compat.Compat, never a hard link.
     compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
-    compileOnly("net.kyori:adventure-api:4.26.1")
-    compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
+    compileOnly("net.kyori:adventure-api:5.2.0")
+    compileOnly("net.kyori:adventure-text-serializer-plain:5.2.0")
 
     // Optional integration; compile-only so the plugin loads without PlaceholderAPI.
     compileOnly("me.clip:placeholderapi:2.11.6")
@@ -70,10 +70,10 @@ dependencies {
     implementation("com.github.retrooper:packetevents-spigot:2.14.0")
     // PacketEvents' wrapper API uses Adventure components, but does not carry
     // the plain/gson serializers our policy and fallback messages need.
-    implementation("net.kyori:adventure-api:4.26.1")
-    implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
-    implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
-    implementation("net.kyori:adventure-text-serializer-legacy:4.26.1")
+    implementation("net.kyori:adventure-api:5.2.0")
+    implementation("net.kyori:adventure-text-serializer-gson:5.2.0")
+    implementation("net.kyori:adventure-text-serializer-plain:5.2.0")
+    implementation("net.kyori:adventure-text-serializer-legacy:5.2.0")
 
     testImplementation("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
