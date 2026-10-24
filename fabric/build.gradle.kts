@@ -36,7 +36,7 @@ dependencies {
     bundled("net.kyori:adventure-text-serializer-plain:4.26.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
 configurations.named("bundled") {

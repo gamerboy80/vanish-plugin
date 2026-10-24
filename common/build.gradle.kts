@@ -13,7 +13,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("org.mockito:mockito-core:4.11.0")
     testImplementation("net.bytebuddy:byte-buddy:1.14.18")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
 tasks.jar {
