@@ -1,37 +1,101 @@
-This repository is a **PaperMC/Spigot Minecraft plugin template**. Users fork or copy it, then replace the example scaffolding with their own plugin.
+# Vanish repository guide
+
+This repository is the standalone staff-vanish plugin extracted from EpicSmpPlugin. It is no longer
+the CrimsonWarpedcraft example template.
 
 ## Architecture
 
-**Entry point**: `ExamplePlugin extends JavaPlugin`. Bukkit/Paper calls `onEnable()` and `onDisable()` during the plugin lifecycle. In `plugin.yml`, `${PACKAGE}.${NAME}` identifies the main class. The `processResources` task fills these placeholders at build time from `group` in `build.gradle.kts` and `rootProject.name` in `settings.gradle.kts`.
+```text
+src/     Spigot + Paper loader (root project)
+  VanishPlugin         JavaPlugin entry point, shaded PacketEvents lifecycle
+  VanishService        main-thread toggle/persistence/visibility API
+  VanishListener       1.8-compatible event isolation + silent inspection
+  VanishCommand        CommandExecutor/TabCompleter for /vanish
+  VanishStore          atomic schema-2 vanish.yml (schema-1 readable)
+  VanishSettings       config snapshot, ampersand color messages
+  VanishIntegrations   dynmap/Essentials reflective hooks
+  VanishPlaceholders   optional PlaceholderAPI expansion (compile-only dep)
+  event/               pre-change cancellable and post-change vanish events
+  compat/              reflection for APIs added after 1.8.8 and raw messages
+  OptionalEvents       by-name registration for newer Spigot/Paper events
 
-**JAR packaging**: The standard `jar` task is disabled, and `shadowJar` is the sole output. It shades CommandAPI and relocates it to `<group>.commandapi`. CommandAPI is excluded from `minimize()` because it loads classes through reflection. `assemble` depends on `shadowJar`.
+common/  platform-independent policy, no server API dependency
+  VanishAPI            static facade for external plugins (Provider interface)
+  VanishOptions        validated immutable config switches
+  VanishView           immutable packet-thread visibility/mention policy
+  VanishState          persisted hidden UUIDs + property baselines
+  VanishBaseline       pre-vanish flight/collision/silent/sleep/spawning/mode
+  VanishActions        short-lived silent block-action markers
+  VanishScoreboard     per-connection team/objective/score projection
+  VanishPackets        PacketEvents send-side firewall shared by every loader
 
-**cw-commons dependency**: [cw-commons](https://github.com/CrimsonWarpedcraft/cw-commons) provides `Command`/`BaseCommand` for command registration, `Config`/`BukkitConfigManagerBuilder` for YAML loading and Jakarta validation, and `BukkitDataStoreBuilder`/`Repository`/`PlayerDataManager` for persistent player data. These classes are not defined locally. The project consumes cw-commons from JitPack as `com.github.CrimsonWarpedcraft:cw-commons`. `build.gradle.kts` pins a tagged release, such as `v0.3.0`, instead of the unstable `main-SNAPSHOT`. Update that tag deliberately.
+modloader/  shared mod service, compiled into each mod loader module
+  ModPlatform          the only adapter surface (server, paths, logger, messages, mappings)
+  SimpleModPlatform    default adapter implementation; Fabric adds mapping resolution
+  ModVanish            main-thread lifecycle, persistence, view projection, visibility sync
+  ModVisibility        entity-tracker add/remove with a packet fallback
+  ModPacketBridge      private PacketEvents Netty platform and per-player encoder injection
+  ModPacketEncoder     outbound ByteBuf handler feeding VanishPackets
+  ModConfig            validated config.json snapshot
+  ModStateStore        atomic schema-2 vanish.json
+  ModCommand/ModCommands  shared command behaviour and Brigadier tree
 
-Jackson and Hibernate Validator remain direct dependencies because `PluginConfig` uses their `@JsonProperty` and `@NotBlank` annotations. cw-commons exposes these libraries as transitive, unbundled `api` dependencies so each consumer can shade and relocate its own copy without classloader conflicts. The direct declarations are redundant for dependency resolution, but they prevent this project from relying on another project's transitive exposure choices.
+fabric/   Fabric 1.21.11 adapter: lifecycle, join/quit, tick and config path
+forge/    Forge 1.21.11 adapter: lifecycle, join/quit, tick and config path
+neoforge/ NeoForge 1.21.11 adapter: lifecycle, join/quit, tick and config path
+```
 
-**Command declaration**: CommandAPI registers commands programmatically in `onEnable()` (see `ExampleCommand`/`BaseCommand`). Adding a matching entry under `commands:` in `plugin.yml` makes Bukkit register the same command a second time, which CommandAPI flags at startup with a "Plugin command ... is registered by Bukkit" warning. `permissions:` entries are unaffected and still required.
+The Bukkit loader and `common` target Java 8 bytecode; the mod loaders target Java 21 and
+Minecraft 1.21.11. Do not move Bukkit-only calls into `common` or `modloader`. Loader adapters
+should stay thin: event wiring, command dispatch and paths only. Put shared behaviour in
+`modloader` and shared policy in `common`.
 
-**Versioning logic** (in `build.gradle.kts`):
+## Build constraints
 
-- No `-Pver` supplied -> `yyMMdd-HHmm-SNAPSHOT`
-- `-Pver=vX.Y.Z-RC-N` -> `X.Y.Z-RC-N-SNAPSHOT`
-- `-Pver=vX.Y.Z` -> `X.Y.Z` (stable release)
+- `common` and `src/` compile with `options.release = 8`; the Bukkit jar must load on 1.8.8 through
+  26.x. Compile against `org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT`; reach newer Bukkit APIs by
+  reflection or optional events.
+- `modloader`, `fabric`, `forge` and `neoforge` compile with `options.release = 21` against
+  Minecraft 1.21.11 official mappings.
+- Run Gradle on JDK 25. ForgeGradle 7 requires it; the Foojay resolver provisions the JDK 21
+  toolchain used by Minecraft modules.
+- PacketEvents 2.14.0 is shaded and relocated to `dev.vanish.libs.*`, with Adventure and Gson, in
+  every artifact. Never depend on a server-installed PacketEvents plugin or mod.
+- Release artifacts: `build/libs/Vanish-*.jar`, `fabric/build/libs/Vanish-Fabric-*.jar`,
+  `forge/build/libs/Vanish-Forge-*.jar`, `neoforge/build/libs/Vanish-NeoForge-*.jar`.
+- Forge uses `forge/build.gradle` (Groovy) for ForgeGradle 7; the other modules use Kotlin DSL.
+- `modloader/` is a source directory, not a Gradle project. Each mod module adds it through
+  `sourceSets.main.java.srcDir("../modloader/src/main/java")`.
 
-**CI workflows** (`.github/workflows/`):
+## Tests and verification
 
-- `pr.yml`: builds and tests on Ubuntu + Windows for PRs and merge queue
-- `main.yml`: builds, tests, and uploads a snapshot artifact on push to `main`
-- `tag.yml` / `release.yml`: handle tagged releases and Discord notifications
-
-**Test suites**: `test` contains isolated unit tests and may mock external boundaries.
-`integrationTest` exercises the pinned cw-commons dependency directly, including configuration
-loading and SQLite persistence. Integration tests use JUnit temporary directories for generated
-files. Run this suite separately with `./gradlew integrationTest`.
+- `./gradlew build` runs the common policy/scoreboard tests, the Bukkit state-store tests and the
+  shared mod config/state tests under `fabric/src/test`, then builds all four artifacts.
+- The common test `TestPacketEvents` replaces PacketEvents with Mockito so real wrappers and version
+  constants are exercised.
+- Runtime verification used Paper 1.8.8 (Java 8) and Paper 1.21.4 (Java 21) with real mineflayer
+  clients. Keep `/vanish`, tab/entity hiding, private/public chat and restart persistence working on
+  both ends of the range when changing Bukkit packet code.
+- Protocol translation is exercised with ViaVersion, ViaBackwards and ViaRewind on Paper 1.21.4,
+  including a 1.8.8 client. Packet wrappers must always be built for the server protocol version;
+  translators rewrite them for the client afterwards. Never select a wrapper from
+  `User#getClientVersion()` (it reports the translated client version).
+- Geyser-Spigot is loaded on Paper 1.21.4 and its reflective session hook is exercised through
+  `/vanish info`; a live Bedrock client has not been connected in this repository yet.
+- The mod loaders compile and package but have not yet been run on live Fabric/Forge/NeoForge
+  servers. Verify entity-tracker add/remove and the PacketEvents encoder insertion there before
+  claiming them as tested.
+- `OptionalEvents` must stay fail-soft: missing classes or methods mean that guard is unavailable,
+  not that the plugin fails to load.
 
 ## Agent instructions
 
-1. Canonical skills live in `.agents/skills/`. The `.claude/skills/` directory is a generated mirror.
-2. `CLAUDE.md` is a generated copy of this `AGENTS.md`.
-3. Do not edit or create `CLAUDE.md` or files under `.claude/skills/`. Claude hooks configured in `.claude/settings.json` synchronize these mirrors on `SessionStart` and `PostToolUse`.
-4. On Windows, direct Gradle calls through the agent terminal have repeatedly hung, including after build completion. For **every Gradle invocation**, use the bounded, log-redirected procedure in `.agents/skills/run-plugin/SKILL.md`; do not run `gradlew.bat` directly in the foreground.
+1. Canonical skills live in `.agents/skills/`; `.claude/skills/` is generated.
+2. Do not edit `CLAUDE.md` or files under `.claude/skills/`; hooks sync them from `AGENTS.md`.
+3. On Windows, use the bounded Gradle procedure in `.agents/skills/run-plugin/SKILL.md`.
+4. Keep README, `docs/compatibility.md`, `docs/usage.md`, `plugin.yml`, the mod metadata files and
+   all four loader modules in sync.
+5. Describe current features positively. Do not mention removed or excluded features in product
+   copy, commands, menus, logs, documentation or release summaries unless the user explicitly asks
+   for that comparison or history. Remove obsolete references when scope changes; do not add
+   absence claims or disclaimers about features that were removed.

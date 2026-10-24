@@ -31,7 +31,11 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Release Build
-          path: ${{ github.workspace }}/build/libs/
+          path: |
+            ${{ github.workspace }}/build/libs/*.jar
+            ${{ github.workspace }}/fabric/build/libs/Vanish-Fabric-*.jar
+            ${{ github.workspace }}/forge/build/libs/Vanish-Forge-*.jar
+            ${{ github.workspace }}/neoforge/build/libs/Vanish-NeoForge-*.jar
           if-no-files-found: error
           retention-days: 14
 
@@ -39,7 +43,11 @@ jobs:
         uses: softprops/action-gh-release@v3
         id: release
         with:
-          files: ${{ github.workspace }}/build/libs/*
+          files: |
+            ${{ github.workspace }}/build/libs/*.jar
+            ${{ github.workspace }}/fabric/build/libs/Vanish-Fabric-*.jar
+            ${{ github.workspace }}/forge/build/libs/Vanish-Forge-*.jar
+            ${{ github.workspace }}/neoforge/build/libs/Vanish-NeoForge-*.jar
           generate_release_notes: true
           name: ${{ format('Release {0}', github.ref_name) }}
           prerelease: ${{ contains(github.ref_name, '-RC-') }}
@@ -61,7 +69,7 @@ jobs:
       - name: Common Setup
         uses: ./.github/actions/common-setup
         with:
-          java-version: 21
+          java-version: 25
 
       - name: Retrieve Project Name
         run: echo "PROJECT_NAME=$(${{github.workspace}}/gradlew -q printProjectName)" >> $GITHUB_ENV

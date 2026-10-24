@@ -40,7 +40,11 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }} Java ${{ matrix.java }} build results
-          path: ${{ github.workspace }}/build/libs/
+          path: |
+            ${{ github.workspace }}/build/libs/*.jar
+            ${{ github.workspace }}/fabric/build/libs/Vanish-Fabric-*.jar
+            ${{ github.workspace }}/forge/build/libs/Vanish-Forge-*.jar
+            ${{ github.workspace }}/neoforge/build/libs/Vanish-NeoForge-*.jar
           if-no-files-found: error
           retention-days: 7
 
@@ -53,26 +57,3 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  integration-test:
-    name: Run integration tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Common Setup
-        uses: ./.github/actions/common-setup
-        with:
-          java-version: 25
-
-      - name: Run integration tests
-        run: ./gradlew integrationTest --info
-
-      - name: Upload integration test results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: Integration test results
-          path: ${{ github.workspace }}/build/reports/tests/integrationTest/
-          if-no-files-found: ignore
-          retention-days: 7

@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[24,]"
+license="GPL-3.0"
+issueTrackerURL="https://github.com/CrimsonWarpedcraft/vanish-plugin/issues"
+
+[[mods]]
+modId="vanish"
+version="${version}"
+displayName="Vanish"
+authors="Vanish"
+description='''
+Staff vanish for Forge servers: packet-level visibility, tab and entity hiding,
+persistent state and operator-only commands.
+'''
+
+[[dependencies.vanish]]
+modId="forge"
+mandatory=true
+versionRange="[${forge},)"
+ordering="NONE"
+side="SERVER"
+
+[[dependencies.vanish]]
+modId="minecraft"
+mandatory=true
+versionRange="[${minecraft},1.22)"
+ordering="NONE"
+side="SERVER"

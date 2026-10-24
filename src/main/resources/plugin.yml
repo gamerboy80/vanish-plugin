@@ -1,15 +1,36 @@
-main: ${PACKAGE}.${NAME}
-name: ${NAME}
+name: Vanish
 version: "${VERSION}"
-api-version: "26.1.2"
-author: AUTHOR
-description: DESCRIPTION
+main: dev.vanish.bukkit.VanishPlugin
+api-version: "1.13"
+description: Cross-version staff vanish for Spigot and Paper 1.8.8-26.x with bundled PacketEvents.
+# Load after protocol translators so PacketEvents binds their per-connection
+# protocol versions before it initializes.
+softdepend: [ViaVersion, ViaBackwards, ViaRewind, ProtocolSupport, Geyser-Spigot]
+author: Vanish
+website: https://github.com/CrimsonWarpedcraft/vanish-plugin
+
+commands:
+  vanish:
+    description: Staff visibility and silent inspection
+    usage: /vanish [on|off|toggle|status] [player]
+    aliases: [v]
+
 permissions:
-  example.use:
-    description: Allows use of the /example command
-    default: true
-  example.*:
-    description: Grants all other permissions
+  vanish.use:
+    description: Toggle your staff vanish
+    default: op
+  vanish.auto:
+    description: Always join vanished, including after leaving visibly
     default: false
-    children:
-      example.use: true
+  vanish.see:
+    description: See vanished staff and receive private vanish notices
+    default: op
+  vanish.others:
+    description: Toggle vanish for other online players and list vanished staff
+    default: op
+  vanish.inspect:
+    description: Silently inspect a container snapshot while vanished
+    default: op
+  vanish.admin:
+    description: Change vanish options, interactions and reload the config
+    default: op

@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.3,8)'
+    id 'com.gradleup.shadow' version '9.6.1'
+}
+
+def minecraftVersion = '1.21.11'
+def forgeVersion = '61.2.4'
+
+sourceSets.main.java.srcDir '../modloader/src/main/java'
+
+minecraft {
+    mappings channel: 'official', version: minecraftVersion
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+configurations {
+    bundled {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
+    implementation project(':common')
+
+    compileOnly 'com.github.retrooper:packetevents-api:2.14.0'
+    compileOnly 'com.github.retrooper:packetevents-netty-common:2.14.0'
+
+    bundled project(':common')
+    bundled 'com.github.retrooper:packetevents-api:2.14.0'
+    bundled 'com.github.retrooper:packetevents-netty-common:2.14.0'
+    bundled 'net.kyori:adventure-api:4.26.1'
+    bundled 'net.kyori:adventure-text-serializer-gson:4.26.1'
+    bundled 'net.kyori:adventure-text-serializer-plain:4.26.1'
+}
+
+configurations.bundled {
+    exclude group: 'io.netty'
+    exclude group: 'org.slf4j'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('processResources') {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft', minecraftVersion
+    inputs.property 'forge', forgeVersion
+    filesMatching('META-INF/mods.toml') {
+        expand(
+            version: project.version,
+            minecraft: minecraftVersion,
+            forge: forgeVersion
+        )
+    }
+}
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveBaseName = 'Vanish-Forge'
+    archiveClassifier = ''
+    configurations = [project.configurations.bundled]
+
+    relocate 'com.github.retrooper.packetevents', 'dev.vanish.libs.packetevents'
+    relocate 'io.github.retrooper.packetevents', 'dev.vanish.libs.packetevents.platform'
+    relocate 'net.kyori', 'dev.vanish.libs.kyori'
+    relocate 'com.google.gson', 'dev.vanish.libs.gson'
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    mergeServiceFiles()
+}
+
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('shadowJar')
+}
+
+tasks.register('printProjectName') {
+    doLast {
+        println 'Vanish-Forge'
+    }
+}

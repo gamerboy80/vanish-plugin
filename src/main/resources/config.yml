@@ -1,13 +1,93 @@
-# Response message for /example ping.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-pong-message: "Pong!"
+# Vanish - Spigot/Paper 1.8.8 through 26.x
+#
+# Apply changes with /vanish reload or /vanish option <name> <on|off>.
+# PacketEvents is shaded into this jar; do not install it separately.
+vanish:
+  # Baseline player state is always saved with vanish.yml. Flight is restored
+  # to the pre-vanish value when grant-flight is disabled.
+  grant-flight: true
+  client-night-vision: true
+  action-bar: true
+  # Send a fake "left/joined the game" line to ordinary players.
+  fake-join-quit: true
+  hide-from-server-list: true
+  hide-from-query: true
+  prevent-incoming-damage: true
+  prevent-hunger: true
+  prevent-xp-pickup: true
+  prevent-mob-targeting: true
+  prevent-collision: true
+  prevent-spawning: true
+  ignore-sleep: true
+  prevent-gliding: true
+  prevent-physical-triggers: true
+  prevent-vibrations: true
+  prevent-raids: true
+  silent-entities: true
+  silent-block-actions: true
+  silent-container-inspection: true
+  retain-death-inventory: true
+  default-item-pickup: false
+  default-chat-public: false
 
-# Response message for /example greet <player>.
-# Use {player} as a placeholder for the target player's name.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-greet-message: "Hello, {player}!"
+  # Interaction guards. /vanish interactions on|off flips this whole block.
+  prevent-attacking: false
+  prevent-block-breaking: false
+  prevent-block-placing: false
+  prevent-world-interactions: false
+  prevent-entity-interactions: false
+  prevent-item-drop: false
+  prevent-projectiles: false
+  prevent-buckets: false
+  prevent-item-consumption: false
+  prevent-mounting: false
+  prevent-bed-use: false
+  prevent-inventory-access: false
 
-# Response message for /example creepersKilled.
-# Use {count} as a placeholder for the sender's creeper-kill count.
-# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
-creepers-killed-message: "You have killed {count} creeper(s)!"
+# Complementary palette used by every message below. Messages accept
+# {primary}, {secondary}, {accent}, {success}, {warning}, {error}, {muted},
+# {text} and {reset}; change these once to retheme the whole plugin.
+palette:
+  primary: "&d"
+  secondary: "&5"
+  accent: "&a"
+  success: "&a"
+  warning: "&e"
+  error: "&c"
+  muted: "&8"
+  text: "&f"
+  reset: "&r"
+
+# Named placeholders: {player}, {state}, {count}, {players}, {option},
+# {permission}. Every message is prefixed unless you clear messages.prefix.
+messages:
+  prefix: "{muted}[{primary}Vanish{muted}]{reset} "
+  enabled: "{accent}You are now vanished."
+  disabled: "{primary}You are visible again."
+  joined-vanished: "{accent}You joined vanished."
+  status-vanished: "{muted}{player} {text}is {accent}vanished{text}."
+  status-visible: "{muted}{player} {text}is {primary}visible{text}."
+  list: "{muted}Vanished ({count}{muted}): {players}"
+  list-empty: "{muted}No vanished staff online."
+  reloaded: "{success}Configuration reloaded."
+  target-vanished: "{muted}{player} {text}is now {accent}vanished{text}."
+  target-visible: "{muted}{player} {text}is now {primary}visible{text}."
+  staff-vanished: "{muted}{player} {text}vanished."
+  staff-visible: "{muted}{player} {text}became visible."
+  staff-joined: "{muted}{player} {text}joined vanished."
+  staff-left: "{muted}{player} {text}left while vanished."
+  staff-died: "{muted}{player} {text}died while vanished."
+  fake-quit: "{muted}{player} left the game"
+  fake-join: "{muted}{player} joined the game"
+  permission: "{error}You need {permission}."
+  player-only: "{error}Run this command as a player."
+  unknown-player: "{error}Specify an online player."
+  save-failed: "{error}Vanish save failed; contact an admin."
+  pickup: "{muted}Item pickup: {state}."
+  chat: "{muted}Chat channel: {state}."
+  interactions-status: "{muted}Interactions: {state}."
+  interactions-saved: "{success}Interactions: {state}."
+  option-saved: "{success}Saved vanish option: {option}."
+  options-header: "{muted}Vanish options:"
+  option-line: "{muted}  {option} {state}"
+  help: "{muted}/vanish [on|off|toggle|status] [player] | list | pickup | inspect | chat | options | interactions | info | doctor | reload"
